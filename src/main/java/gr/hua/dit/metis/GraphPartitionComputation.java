@@ -5,7 +5,9 @@ import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.COARS
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.COMPUTATION_PHASE_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.DISTRIBUTING_EDGES_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.FOLDING_VERTICES_AGGREGATOR;
+import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.INPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.MAXIMUM_WEIGHTED_MATCHING_AGGREGATOR;
+import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.OUTPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.PARTITIONING_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.REFINING_LOCALLY_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.SPLITTING_VERTICES_AGGREGATOR;
@@ -18,7 +20,10 @@ import static gr.hua.dit.metis.GraphPartitionConstants.ComputationConstants.SPLI
 import static gr.hua.dit.metis.GraphPartitionConstants.MessageConstants.CHILD_MESSAGE;
 import static gr.hua.dit.metis.GraphPartitionConstants.MessageConstants.HIDE_MESSAGE;
 import static gr.hua.dit.metis.GraphPartitionConstants.MessageConstants.MATCH_MESSAGE;
+import static gr.hua.dit.metis.GraphPartitionConstants.MessageConstants.PARTITION_MESSAGE;
 import static gr.hua.dit.metis.GraphPartitionConstants.MessageConstants.WAKEUP_MESSAGE;
+import gr.hua.dit.metis.io.LongToDoubleMapWritable;
+import gr.hua.dit.metis.io.LongToLongMapWritable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -165,9 +170,31 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
         } else if (vertexPrepared(vertex, PARTITIONING)) {
             aggregate(PARTITIONING_AGGREGATOR, new LongWritable(1));
             if (!hasPartition(vertex)) {
-                // TODO: Partition graph properly
-                long partition = generatePartition(vertex); // TODO: Implement
-                vertex.getValue().setPartition(partition);
+                LongToLongMapWritable outGraph = getAggregatedValue(OUTPUT_GRAPH_AGGREGATOR);
+                if (outGraph.getData().isEmpty()) {
+                    aggregate(INPUT_GRAPH_AGGREGATOR, new LongToDoubleMapWritable(vertex.getId().get(), vertex.getValue().getWeight()));
+                } else {
+                    Long partition = outGraph.getData().get(vertex.getId().get());
+                    if (partition != null) {
+                        vertex.getValue().setPartition(partition);
+                        LOGGER.debug(vertex.getId() + " was assigned to partition " + partition);
+                        // Inform all neighbors of assigned partition in case someone
+                        // was not assigned one (see generatePartitions() in MasterCompute)
+                        sendMessageToAllEdges(vertex, new GraphPartitionMessageData(PARTITION_MESSAGE, vertex.getId().get(), partition, vertex.getValue().getWeight()));
+                    } else {
+                        double min = Double.MAX_VALUE;
+                        // Inherit partition of minimum weighted neighbor
+                        for (GraphPartitionMessageData message : messages) {
+                            if (message.getMessageType() == PARTITION_MESSAGE) {
+                                if (message.getDoubleData() < min) {
+                                    min = message.getDoubleData();
+                                    vertex.getValue().setPartition(message.getLongData());
+                                    LOGGER.debug(vertex.getId() + " was assigned to partition " + message.getLongData());
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
                 voteToSplit(vertex);
             }

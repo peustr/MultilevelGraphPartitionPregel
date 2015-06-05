@@ -5,7 +5,9 @@ import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.COARS
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.COMPUTATION_PHASE_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.DISTRIBUTING_EDGES_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.FOLDING_VERTICES_AGGREGATOR;
+import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.INPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.MAXIMUM_WEIGHTED_MATCHING_AGGREGATOR;
+import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.OUTPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.PARTITIONING_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.REFINING_LOCALLY_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.SPLITTING_VERTICES_AGGREGATOR;
@@ -15,9 +17,14 @@ import static gr.hua.dit.metis.GraphPartitionConstants.ComputationConstants.MAXI
 import static gr.hua.dit.metis.GraphPartitionConstants.ComputationConstants.PARTITIONING;
 import static gr.hua.dit.metis.GraphPartitionConstants.ComputationConstants.REFINING_LOCALLY;
 import static gr.hua.dit.metis.GraphPartitionConstants.ComputationConstants.SPLITTING_VERTICES;
+import gr.hua.dit.metis.aggregators.LongToDoubleMapAggregator;
+import gr.hua.dit.metis.aggregators.LongToLongMapAggregator;
+import gr.hua.dit.metis.io.LongToDoubleMapWritable;
+import gr.hua.dit.metis.io.LongToLongMapWritable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Map.Entry;
 import org.apache.giraph.aggregators.BooleanOverwriteAggregator;
 import org.apache.giraph.aggregators.IntOverwriteAggregator;
 import org.apache.giraph.aggregators.LongSumAggregator;
@@ -88,6 +95,10 @@ public class GraphPartitionMasterCompute extends DefaultMasterCompute {
                 if (computationPhase == PARTITIONING) {
                     long partitioning = getPartitioningActiveVertices();
                     LOGGER.debug(partitioning + " vertices active on partitioning");
+                    LongToDoubleMapWritable inGraph = getAggregatedValue(INPUT_GRAPH_AGGREGATOR);
+                    if (!inGraph.getData().isEmpty()) {
+                        generatePartitions(inGraph, k);
+                    }
                     if (partitioning == 0) {
                         LOGGER.debug("Changing to splitting vertices");
                         computationPhase = SPLITTING_VERTICES;
@@ -124,6 +135,8 @@ public class GraphPartitionMasterCompute extends DefaultMasterCompute {
         registerAggregator(PARTITIONING_AGGREGATOR, LongSumAggregator.class);
         registerAggregator(SPLITTING_VERTICES_AGGREGATOR, LongSumAggregator.class);
         registerAggregator(REFINING_LOCALLY_AGGREGATOR, LongSumAggregator.class);
+        registerPersistentAggregator(INPUT_GRAPH_AGGREGATOR, LongToDoubleMapAggregator.class);
+        registerPersistentAggregator(OUTPUT_GRAPH_AGGREGATOR, LongToLongMapAggregator.class);
     }
 
     @Override
@@ -166,6 +179,18 @@ public class GraphPartitionMasterCompute extends DefaultMasterCompute {
 
     private long getRefiningActiveVertices() {
         return ((LongWritable) getAggregatedValue(REFINING_LOCALLY_AGGREGATOR)).get();
+    }
+
+    private void generatePartitions(LongToDoubleMapWritable inGraph, long k) {
+        LongToLongMapWritable outGraph = new LongToLongMapWritable();
+        long count = 1l;
+        for (Entry<Long, Double> vertex : inGraph.getData().entrySet()) {
+            if (count <= k) {
+                outGraph.getData().put(vertex.getKey(), count);
+                count++;
+            }
+        }
+        setAggregatedValue(OUTPUT_GRAPH_AGGREGATOR, outGraph);
     }
 
 }

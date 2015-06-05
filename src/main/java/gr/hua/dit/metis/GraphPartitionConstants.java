@@ -23,6 +23,7 @@ public class GraphPartitionConstants {
         public static final int HIDE_MESSAGE = -2;
         public static final int CHILD_MESSAGE = -3;
         public static final int WAKEUP_MESSAGE = -4;
+        public static final int PARTITION_MESSAGE = -5;
 
     }
 
@@ -37,6 +38,8 @@ public class GraphPartitionConstants {
         public static final String PARTITIONING_AGGREGATOR = "PARTITIONING_AGGREGATOR";
         public static final String SPLITTING_VERTICES_AGGREGATOR = "SPLITTING_VERTICES_AGGREGATOR";
         public static final String REFINING_LOCALLY_AGGREGATOR = "REFINING_LOCALLY_AGGREGATOR";
+        public static final String INPUT_GRAPH_AGGREGATOR = "INPUT_GRAPH_AGGREGATOR";
+        public static final String OUTPUT_GRAPH_AGGREGATOR = "OUTPUT_GRAPH_AGGREGATOR";
 
     }
 

@@ -1,6 +1,6 @@
 package gr.hua.dit.metis;
 
-import gr.hua.dit.metis.io.LongDoubleMapWritable;
+import gr.hua.dit.metis.io.LongToDoubleMapWritable;
 import gr.hua.dit.metis.io.LongSetWritable;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -18,7 +18,7 @@ public class GraphPartitionVertexData implements Writable {
     private long pickedVertex, childVertex, partition;
     private double weight, pickedVertexWeight, pickedEdgeWeight;
     private LongSetWritable hiddenNeighbors;
-    private LongDoubleMapWritable creators, nLevelNeighbors;
+    private LongToDoubleMapWritable creators, nLevelNeighbors;
 
     @Override
     public void write(DataOutput out) throws IOException {
@@ -50,8 +50,8 @@ public class GraphPartitionVertexData implements Writable {
 
     public GraphPartitionVertexData() {
         hiddenNeighbors = new LongSetWritable();
-        creators = new LongDoubleMapWritable();
-        nLevelNeighbors = new LongDoubleMapWritable();
+        creators = new LongToDoubleMapWritable();
+        nLevelNeighbors = new LongToDoubleMapWritable();
     }
 
     public GraphPartitionVertexData(int computationPhase, double weight) {
@@ -62,8 +62,8 @@ public class GraphPartitionVertexData implements Writable {
         partition = Long.MAX_VALUE;
         pickedEdgeWeight = -Double.MAX_VALUE;
         hiddenNeighbors = new LongSetWritable();
-        creators = new LongDoubleMapWritable();
-        nLevelNeighbors = new LongDoubleMapWritable();
+        creators = new LongToDoubleMapWritable();
+        nLevelNeighbors = new LongToDoubleMapWritable();
     }
 
     public GraphPartitionVertexData(int computationPhase, double weight, Map<Long, Double> creators) {
@@ -74,9 +74,9 @@ public class GraphPartitionVertexData implements Writable {
         partition = Long.MAX_VALUE;
         pickedEdgeWeight = -Double.MAX_VALUE;
         hiddenNeighbors = new LongSetWritable();
-        this.creators = new LongDoubleMapWritable();
+        this.creators = new LongToDoubleMapWritable();
         this.creators.setData(creators);
-        nLevelNeighbors = new LongDoubleMapWritable();
+        nLevelNeighbors = new LongToDoubleMapWritable();
     }
 
     public int getComputationPhase() {
@@ -143,19 +143,19 @@ public class GraphPartitionVertexData implements Writable {
         this.hiddenNeighbors = hiddenNeighbors;
     }
 
-    public LongDoubleMapWritable getCreators() {
+    public LongToDoubleMapWritable getCreators() {
         return creators;
     }
 
-    public void setCreators(LongDoubleMapWritable creators) {
+    public void setCreators(LongToDoubleMapWritable creators) {
         this.creators = creators;
     }
 
-    public LongDoubleMapWritable getnLevelNeighbors() {
+    public LongToDoubleMapWritable getnLevelNeighbors() {
         return nLevelNeighbors;
     }
 
-    public void setnLevelNeighbors(LongDoubleMapWritable nLevelNeighbors) {
+    public void setnLevelNeighbors(LongToDoubleMapWritable nLevelNeighbors) {
         this.nLevelNeighbors = nLevelNeighbors;
     }
 

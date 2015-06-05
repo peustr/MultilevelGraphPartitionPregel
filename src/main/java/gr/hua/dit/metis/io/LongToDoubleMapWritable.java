@@ -9,12 +9,17 @@ import java.util.Map.Entry;
 
 import org.apache.hadoop.io.Writable;
 
-public class LongDoubleMapWritable implements Writable {
+public class LongToDoubleMapWritable implements Writable {
 
     private Map<Long, Double> data;
 
-    public LongDoubleMapWritable() {
+    public LongToDoubleMapWritable() {
         data = new HashMap<>();
+    }
+
+    public LongToDoubleMapWritable(long l, double d) {
+        data = new HashMap<>();
+        data.put(l, d);
     }
 
     @Override
