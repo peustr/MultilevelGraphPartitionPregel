@@ -257,11 +257,6 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
         return Math.abs(UUID.randomUUID().getLeastSignificantBits());
     }
 
-    private long generatePartition(Vertex<LongWritable, GraphPartitionVertexData, DoubleWritable> vertex) {
-        Random gen = new Random();
-        return gen.nextInt();
-    }
-
     // Helprer vote functions
     private void voteToMatch(Vertex<LongWritable, GraphPartitionVertexData, DoubleWritable> vertex) {
         vertex.getValue().setComputationPhase(MAXIMUM_WEIGHTED_MATCHING);
