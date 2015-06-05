@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite failures="0" time="14.468" errors="0" skipped="0" tests="1" name="gr.hua.dit.metis.GraphPartitionTests">
+<testsuite failures="0" time="24.527" errors="0" skipped="0" tests="2" name="gr.hua.dit.metis.GraphPartitionTests">
   <properties>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64"/>
@@ -61,5 +61,6 @@
     <property name="sun.desktop" value="gnome"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase time="14.23" classname="gr.hua.dit.metis.GraphPartitionTests" name="metisOnTinyUnweightedGraph"/>
+  <testcase time="13.964" classname="gr.hua.dit.metis.GraphPartitionTests" name="metisOnTinyUnweightedGraph"/>
+  <testcase time="10.332" classname="gr.hua.dit.metis.GraphPartitionTests" name="metisOnTinyWeightedGraph"/>
 </testsuite>

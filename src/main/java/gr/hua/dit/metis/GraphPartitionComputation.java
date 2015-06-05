@@ -183,11 +183,14 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                         sendMessageToAllEdges(vertex, new GraphPartitionMessageData(PARTITION_MESSAGE, vertex.getId().get(), partition, vertex.getValue().getWeight()));
                     } else {
                         double min = Double.MAX_VALUE;
+                        long minId = Long.MAX_VALUE;
                         // Inherit partition of minimum weighted neighbor
+                        // and solve ties by minimum vertex id
                         for (GraphPartitionMessageData message : messages) {
                             if (message.getMessageType() == PARTITION_MESSAGE) {
-                                if (message.getDoubleData() < min) {
+                                if ((message.getDoubleData() < min) || (message.getDoubleData() == min && message.getSenderId() < minId)) {
                                     min = message.getDoubleData();
+                                    minId = message.getSenderId();
                                     vertex.getValue().setPartition(message.getLongData());
                                     LOGGER.debug(vertex.getId() + " was assigned to partition " + message.getLongData());
                                 }
