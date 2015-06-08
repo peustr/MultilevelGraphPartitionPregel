@@ -40,6 +40,7 @@ public class GraphPartitionConstants {
         public static final String REFINING_LOCALLY_AGGREGATOR = "REFINING_LOCALLY_AGGREGATOR";
         public static final String INPUT_GRAPH_AGGREGATOR = "INPUT_GRAPH_AGGREGATOR";
         public static final String OUTPUT_GRAPH_AGGREGATOR = "OUTPUT_GRAPH_AGGREGATOR";
+        public static final String MIGRATION_CANDIDATE_AGGREGATOR = "MIGRATION_CANDIDATE_AGGREGATOR";
 
     }
 

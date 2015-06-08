@@ -7,6 +7,7 @@ import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.DISTR
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.FOLDING_VERTICES_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.INPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.MAXIMUM_WEIGHTED_MATCHING_AGGREGATOR;
+import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.MIGRATION_CANDIDATE_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.OUTPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.PARTITIONING_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.REFINING_LOCALLY_AGGREGATOR;
@@ -28,7 +29,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.UUID;
 import org.apache.giraph.edge.Edge;
 import org.apache.giraph.edge.EdgeFactory;
@@ -191,9 +191,18 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                                 if ((message.getDoubleData() < min) || (message.getDoubleData() == min && message.getSenderId() < minId)) {
                                     min = message.getDoubleData();
                                     minId = message.getSenderId();
-                                    vertex.getValue().setPartition(message.getLongData());
-                                    LOGGER.debug(vertex.getId() + " was assigned to partition " + message.getLongData());
+                                    vertex.getValue().setPartitionCandidate(message.getLongData());
+                                    aggregate(MIGRATION_CANDIDATE_AGGREGATOR + vertex.getValue().getPartitionCandidate(), new LongWritable(1));
+                                    LOGGER.debug(vertex.getId() + " wants to migrate to partition " + message.getLongData());
                                 }
+                            }
+                        }
+                        long migrationCount = getMigrationCount(vertex.getValue().getPartitionCandidate());
+                        if (migrationCount > 0) {
+                            double migrationProbability = 1 / migrationCount;
+                            if (Math.random() < migrationProbability) {
+                                vertex.getValue().setPartition(vertex.getValue().getPartitionCandidate());
+                                LOGGER.debug(vertex.getId() + " migrated to partition " + vertex.getValue().getPartition());
                             }
                         }
                     }
@@ -251,6 +260,10 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
 
     private boolean hasPartition(Vertex<LongWritable, GraphPartitionVertexData, DoubleWritable> vertex) {
         return vertex.getValue().getPartition() != Long.MAX_VALUE;
+    }
+
+    private long getMigrationCount(long partition) {
+        return ((LongWritable) getAggregatedValue(MIGRATION_CANDIDATE_AGGREGATOR + partition)).get();
     }
 
     private long generateUniqueId() {

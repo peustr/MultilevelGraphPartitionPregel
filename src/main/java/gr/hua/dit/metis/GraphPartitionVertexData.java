@@ -15,7 +15,7 @@ import org.apache.hadoop.io.Writable;
 public class GraphPartitionVertexData implements Writable {
 
     private int computationPhase;
-    private long pickedVertex, childVertex, partition;
+    private long pickedVertex, childVertex, partition, partitionCandidate;
     private double weight, pickedVertexWeight, pickedEdgeWeight;
     private LongSetWritable hiddenNeighbors;
     private LongToDoubleMapWritable creators, nLevelNeighbors;
@@ -109,6 +109,14 @@ public class GraphPartitionVertexData implements Writable {
 
     public void setPartition(long partition) {
         this.partition = partition;
+    }
+
+    public long getPartitionCandidate() {
+        return partitionCandidate;
+    }
+
+    public void setPartitionCandidate(long partitionCandidate) {
+        this.partitionCandidate = partitionCandidate;
     }
 
     public double getWeight() {

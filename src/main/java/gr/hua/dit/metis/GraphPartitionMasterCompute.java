@@ -7,6 +7,7 @@ import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.DISTR
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.FOLDING_VERTICES_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.INPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.MAXIMUM_WEIGHTED_MATCHING_AGGREGATOR;
+import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.MIGRATION_CANDIDATE_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.OUTPUT_GRAPH_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.PARTITIONING_AGGREGATOR;
 import static gr.hua.dit.metis.GraphPartitionConstants.AggregatorConstants.REFINING_LOCALLY_AGGREGATOR;
@@ -137,6 +138,10 @@ public class GraphPartitionMasterCompute extends DefaultMasterCompute {
         registerAggregator(REFINING_LOCALLY_AGGREGATOR, LongSumAggregator.class);
         registerPersistentAggregator(INPUT_GRAPH_AGGREGATOR, LongToDoubleMapAggregator.class);
         registerPersistentAggregator(OUTPUT_GRAPH_AGGREGATOR, LongToLongMapAggregator.class);
+        k = Long.valueOf(getConf().get("partitions"));
+        for (long i = 0; i < k; i++) {
+            registerAggregator(MIGRATION_CANDIDATE_AGGREGATOR + i, LongSumAggregator.class);
+        }
     }
 
     @Override
