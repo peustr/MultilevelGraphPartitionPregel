@@ -26,9 +26,12 @@ import static gr.hua.dit.metis.GraphPartitionConstants.MessageConstants.WAKEUP_M
 import gr.hua.dit.metis.io.LongToDoubleMapWritable;
 import gr.hua.dit.metis.io.LongToLongMapWritable;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.UUID;
 import org.apache.giraph.edge.Edge;
 import org.apache.giraph.edge.EdgeFactory;
@@ -200,6 +203,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                         long migrationCount = getMigrationCount(vertex.getValue().getPartitionCandidate());
                         if (migrationCount > 0) {
                             double migrationProbability = 1 / migrationCount;
+                            LOGGER.debug("Chance of migration during partitioning " + migrationProbability + "%");
                             if (Math.random() < migrationProbability) {
                                 vertex.getValue().setPartition(vertex.getValue().getPartitionCandidate());
                                 LOGGER.debug(vertex.getId() + " migrated to partition " + vertex.getValue().getPartition());
@@ -236,8 +240,23 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
             }
         } else if (vertexPrepared(vertex, REFINING_LOCALLY)) {
             aggregate(REFINING_LOCALLY_AGGREGATOR, new LongWritable(1));
-            // TODO: Implement local refinement
-            voteToSplit(vertex);
+            Map<Long, Double> partitionWeights = new HashMap<>();
+            // Iterate through messages
+            for (GraphPartitionMessageData message : messages) {
+                // For every neighbor partition, append the edge weight
+                append(partitionWeights, message.getLongData(), vertex.getEdgeValue(new LongWritable(message.getSenderId())).get());
+            }
+            if (partitionWeights.isEmpty()) {
+                // Inform all neighbors of my partition
+                sendMessageToAllEdges(vertex, new GraphPartitionMessageData(PARTITION_MESSAGE, vertex.getId().get(), vertex.getValue().getPartition()));
+            } else {
+                SortedMap<Long, Double> sortedWeights = sort(partitionWeights);
+                if (sortedWeights.get(vertex.getValue().getPartition()) < sortedWeights.get(sortedWeights.lastKey())) {
+                    aggregate(MIGRATION_CANDIDATE_AGGREGATOR + sortedWeights.lastKey(), new LongWritable(1));
+                    LOGGER.debug(vertex.getId() + " wants to migrate to partition " + sortedWeights.lastKey());
+                }
+                voteToSplit(vertex);
+            }
         }
     }
 
@@ -268,6 +287,25 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
 
     private long generateUniqueId() {
         return Math.abs(UUID.randomUUID().getLeastSignificantBits());
+    }
+
+    private void append(Map<Long, Double> m, Long l, Double d) {
+        if (m.get(l) != null) {
+            m.put(l, m.get(l) + d);
+        } else {
+            m.put(l, d);
+        }
+    }
+
+    private SortedMap<Long, Double> sort(final Map<Long, Double> m) {
+        SortedMap<Long, Double> tm = new TreeMap<>(new Comparator<Long>() {
+            @Override
+            public int compare(Long o1, Long o2) {
+                return m.get(o1).compareTo(m.get(o2));
+            }
+        });
+        tm.putAll(m);
+        return tm;
     }
 
     // Helprer vote functions
