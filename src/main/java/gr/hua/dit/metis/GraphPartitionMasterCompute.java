@@ -139,7 +139,7 @@ public class GraphPartitionMasterCompute extends DefaultMasterCompute {
         registerPersistentAggregator(INPUT_GRAPH_AGGREGATOR, LongToDoubleMapAggregator.class);
         registerPersistentAggregator(OUTPUT_GRAPH_AGGREGATOR, LongToLongMapAggregator.class);
         k = Long.valueOf(getConf().get("partitions"));
-        for (long i = 0; i < k; i++) {
+        for (long i = 1; i <= k; i++) {
             registerAggregator(MIGRATION_CANDIDATE_AGGREGATOR + i, LongSumAggregator.class);
         }
     }

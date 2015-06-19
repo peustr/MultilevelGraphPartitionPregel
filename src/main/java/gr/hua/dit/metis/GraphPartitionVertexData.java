@@ -18,7 +18,7 @@ public class GraphPartitionVertexData implements Writable {
     private long pickedVertex, childVertex, partition, partitionCandidate;
     private double weight, pickedVertexWeight, pickedEdgeWeight;
     private LongSetWritable hiddenNeighbors;
-    private LongToDoubleMapWritable creators, nLevelNeighbors;
+    private LongToDoubleMapWritable creators, nLevelNeighbors, partitionWeights;
 
     @Override
     public void write(DataOutput out) throws IOException {
@@ -26,12 +26,14 @@ public class GraphPartitionVertexData implements Writable {
         out.writeLong(pickedVertex);
         out.writeLong(childVertex);
         out.writeLong(partition);
+        out.writeLong(partitionCandidate);
         out.writeDouble(weight);
         out.writeDouble(pickedVertexWeight);
         out.writeDouble(pickedEdgeWeight);
         hiddenNeighbors.write(out);
         creators.write(out);
         nLevelNeighbors.write(out);
+        partitionWeights.write(out);
     }
 
     @Override
@@ -40,18 +42,21 @@ public class GraphPartitionVertexData implements Writable {
         pickedVertex = in.readLong();
         childVertex = in.readLong();
         partition = in.readLong();
+        partitionCandidate = in.readLong();
         weight = in.readDouble();
         pickedVertexWeight = in.readDouble();
         pickedEdgeWeight = in.readDouble();
         hiddenNeighbors.readFields(in);
         creators.readFields(in);
         nLevelNeighbors.readFields(in);
+        partitionWeights.readFields(in);
     }
 
     public GraphPartitionVertexData() {
         hiddenNeighbors = new LongSetWritable();
         creators = new LongToDoubleMapWritable();
         nLevelNeighbors = new LongToDoubleMapWritable();
+        partitionWeights = new LongToDoubleMapWritable();
     }
 
     public GraphPartitionVertexData(int computationPhase, double weight) {
@@ -60,10 +65,12 @@ public class GraphPartitionVertexData implements Writable {
         pickedVertex = Long.MAX_VALUE;
         childVertex = Long.MAX_VALUE;
         partition = Long.MAX_VALUE;
+        partitionCandidate = Long.MAX_VALUE;
         pickedEdgeWeight = -Double.MAX_VALUE;
         hiddenNeighbors = new LongSetWritable();
         creators = new LongToDoubleMapWritable();
         nLevelNeighbors = new LongToDoubleMapWritable();
+        partitionWeights = new LongToDoubleMapWritable();
     }
 
     public GraphPartitionVertexData(int computationPhase, double weight, Map<Long, Double> creators) {
@@ -72,11 +79,13 @@ public class GraphPartitionVertexData implements Writable {
         pickedVertex = Long.MAX_VALUE;
         childVertex = Long.MAX_VALUE;
         partition = Long.MAX_VALUE;
+        partitionCandidate = Long.MAX_VALUE;
         pickedEdgeWeight = -Double.MAX_VALUE;
         hiddenNeighbors = new LongSetWritable();
         this.creators = new LongToDoubleMapWritable();
         this.creators.setData(creators);
         nLevelNeighbors = new LongToDoubleMapWritable();
+        partitionWeights = new LongToDoubleMapWritable();
     }
 
     public int getComputationPhase() {
@@ -167,6 +176,14 @@ public class GraphPartitionVertexData implements Writable {
         this.nLevelNeighbors = nLevelNeighbors;
     }
 
+    public LongToDoubleMapWritable getPartitionWeights() {
+        return partitionWeights;
+    }
+
+    public void setPartitionWeights(LongToDoubleMapWritable partitionWeights) {
+        this.partitionWeights = partitionWeights;
+    }
+
     @Override
     public String toString() {
         return String.valueOf(partition);
@@ -187,6 +204,14 @@ public class GraphPartitionVertexData implements Writable {
             nLevelNeighbors.getData().put(vertexId, curWeight + edgeWeight);
         } else {
             nLevelNeighbors.getData().put(vertexId, edgeWeight);
+        }
+    }
+
+    public void appendPartitionWeights(Long l, Double d) {
+        if (partitionWeights.getData().get(l) != null) {
+            partitionWeights.getData().put(l, partitionWeights.getData().get(l) + d);
+        } else {
+            partitionWeights.getData().put(l, d);
         }
     }
 }
