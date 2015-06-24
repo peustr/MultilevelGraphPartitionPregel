@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -51,6 +52,12 @@ import org.slf4j.LoggerFactory;
 public class GraphPartitionComputation extends BasicComputation<LongWritable, GraphPartitionVertexData, DoubleWritable, GraphPartitionMessageData> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphPartitionComputation.class);
+    
+    private static final Random randomNumberGenerator;
+    
+    static { 
+        randomNumberGenerator = new Random(1);
+    }
 
     @Override
     public void compute(Vertex<LongWritable, GraphPartitionVertexData, DoubleWritable> vertex, Iterable<GraphPartitionMessageData> messages) throws IOException {
@@ -78,7 +85,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                 }
                 // If I found maximum weighted neighbor
                 if (pickedVertex != Long.MAX_VALUE) {
-                    LOGGER.debug(vertex.getId() + " wants " + pickedVertex + " to match it");
+                    //LOGGER.debug(vertex.getId() + " wants " + pickedVertex + " to match it");
                     sendMessage(new LongWritable(pickedVertex), new GraphPartitionMessageData(MATCH_MESSAGE, vertex.getId().get(), vertex.getValue().getWeight()));
                 } // Else, I am alone
                 else {
@@ -205,7 +212,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                             if (migrationCount > 0) {
                                 double migrationProbability = 1 / migrationCount;
                                 LOGGER.debug("Chance of migration during partitioning " + migrationProbability + "%");
-                                if (Math.random() < migrationProbability) {
+                                if (randomNumberGenerator.nextDouble() < migrationProbability) {
                                     vertex.getValue().setPartition(vertex.getValue().getPartitionCandidate());
                                     LOGGER.debug(vertex.getId() + " migrated to partition " + vertex.getValue().getPartition());
                                 }
@@ -256,7 +263,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                 if (migrationCount > 0) {
                     double migrationProbability = 1 / migrationCount;
                     LOGGER.debug("Chance of migration during local refinement " + migrationProbability + "%");
-                    if (Math.random() < migrationProbability) {
+                    if (randomNumberGenerator.nextDouble() < migrationProbability) {
                         vertex.getValue().setPartition(sortedWeights.lastKey());
                         LOGGER.debug(vertex.getId() + " migrated to partition " + vertex.getValue().getPartition());
                     }
@@ -306,7 +313,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
         return Math.abs(UUID.randomUUID().getLeastSignificantBits());
     }
 
-    private SortedMap<Long, Double> sort(Map<Long, Double> m) {
+    private static SortedMap<Long, Double> sort(Map<Long, Double> m) {
         final Map<Long, Double> mCopy = m;
         SortedMap<Long, Double> tm = new TreeMap<>(new Comparator<Long>() {
             @Override

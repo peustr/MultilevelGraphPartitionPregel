@@ -1,5 +1,8 @@
 package gr.hua.dit.metis;
 
+import java.io.File;
+import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.io.formats.IdWithValueTextOutputFormat;
 import org.apache.giraph.utils.InternalVertexRunner;
@@ -48,6 +51,32 @@ public class GraphPartitionTests {
         conf.setVertexInputFormatClass(GraphPartitionVertexValueInputFormat.class);
         conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
         conf.set("partitions", "3");
+
+        Iterable<String> results = InternalVertexRunner.run(conf, tinyGraph, tinyGraph);
+        for (String result : results) {
+            LOGGER.debug(result);
+        }
+
+    }
+    
+    @Test
+    public void metisFromFile() throws Exception {
+
+        List<String> l = FileUtils.readLines(new File("/tmp/3elt.graph.out"));
+        String[] tinyGraph = new String[l.size()];
+        int i = 0;
+        for(String str: l) { 
+            tinyGraph[i++] = str;
+        }
+        
+        GiraphConfiguration conf = new GiraphConfiguration();
+        conf.setComputationClass(GraphPartitionComputation.class);
+        conf.setMasterComputeClass(GraphPartitionMasterCompute.class);
+        conf.setEdgeInputFormatClass(GraphPartitionEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(GraphPartitionVertexValueInputFormat.class);
+        conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
+        conf.set("partitions", "3");
+        conf.set("giraph.useSuperstepCounters", "false");
 
         Iterable<String> results = InternalVertexRunner.run(conf, tinyGraph, tinyGraph);
         for (String result : results) {
