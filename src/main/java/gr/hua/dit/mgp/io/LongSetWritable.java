@@ -1,4 +1,4 @@
-package gr.hua.dit.metis.io;
+package gr.hua.dit.mgp.io;
 
 import java.io.DataInput;
 import java.io.DataOutput;

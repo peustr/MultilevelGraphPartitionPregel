@@ -1,6 +1,6 @@
-package gr.hua.dit.metis.aggregators;
+package gr.hua.dit.mgp.aggregators;
 
-import gr.hua.dit.metis.io.LongToDoubleMapWritable;
+import gr.hua.dit.mgp.io.LongToDoubleMapWritable;
 import java.util.Map.Entry;
 import org.apache.giraph.aggregators.BasicAggregator;
 

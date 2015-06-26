@@ -1,6 +1,7 @@
-package gr.hua.dit.metis;
+package gr.hua.dit.mgp.io;
 
-import static gr.hua.dit.metis.GraphPartitionConstants.ComputationConstants.MAXIMUM_WEIGHTED_MATCHING;
+import gr.hua.dit.mgp.GraphPartitionVertexData;
+import static gr.hua.dit.mgp.GraphPartitionConstants.ComputationConstants.MAXIMUM_WEIGHTED_MATCHING;
 import java.io.IOException;
 import java.util.regex.Pattern;
 import org.apache.giraph.io.formats.TextVertexValueInputFormat;
@@ -14,7 +15,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  *
  * @author peustr
  */
-public class GraphPartitionVertexValueInputFormat extends TextVertexValueInputFormat<LongWritable, GraphPartitionVertexData, DoubleWritable> {
+public class TSVVertexValueInputFormat extends TextVertexValueInputFormat<LongWritable, GraphPartitionVertexData, DoubleWritable> {
 
     private static final Pattern SEPARATOR = Pattern.compile("[\t ]");
 

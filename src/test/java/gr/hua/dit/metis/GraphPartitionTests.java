@@ -1,5 +1,9 @@
 package gr.hua.dit.metis;
 
+import gr.hua.dit.mgp.io.TSVEdgeInputFormat;
+import gr.hua.dit.mgp.GraphPartitionMasterCompute;
+import gr.hua.dit.mgp.GraphPartitionComputation;
+import gr.hua.dit.mgp.io.TSVVertexValueInputFormat;
 import org.apache.giraph.conf.GiraphConfiguration;
 import org.apache.giraph.io.formats.IdWithValueTextOutputFormat;
 import org.apache.giraph.utils.InternalVertexRunner;
@@ -44,8 +48,8 @@ public class GraphPartitionTests {
         GiraphConfiguration conf = new GiraphConfiguration();
         conf.setComputationClass(GraphPartitionComputation.class);
         conf.setMasterComputeClass(GraphPartitionMasterCompute.class);
-        conf.setEdgeInputFormatClass(GraphPartitionEdgeInputFormat.class);
-        conf.setVertexInputFormatClass(GraphPartitionVertexValueInputFormat.class);
+        conf.setEdgeInputFormatClass(TSVEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(TSVVertexValueInputFormat.class);
         conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
         conf.set("partitions", "3");
 

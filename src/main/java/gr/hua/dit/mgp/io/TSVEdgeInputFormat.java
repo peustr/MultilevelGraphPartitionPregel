@@ -1,4 +1,4 @@
-package gr.hua.dit.metis;
+package gr.hua.dit.mgp.io;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  *
  * @author peustr
  */
-public class GraphPartitionEdgeInputFormat extends TextEdgeInputFormat<LongWritable, DoubleWritable> {
+public class TSVEdgeInputFormat extends TextEdgeInputFormat<LongWritable, DoubleWritable> {
 
     private static final Pattern SEPARATOR = Pattern.compile("[\t ]");
 
