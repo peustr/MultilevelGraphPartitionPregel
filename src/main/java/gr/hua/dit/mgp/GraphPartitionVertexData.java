@@ -1,7 +1,7 @@
-package gr.hua.dit.metis;
+package gr.hua.dit.mgp;
 
-import gr.hua.dit.metis.io.LongToDoubleMapWritable;
-import gr.hua.dit.metis.io.LongSetWritable;
+import gr.hua.dit.mgp.io.LongToDoubleMapWritable;
+import gr.hua.dit.mgp.io.LongSetWritable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;

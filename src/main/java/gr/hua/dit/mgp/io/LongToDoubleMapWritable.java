@@ -1,27 +1,25 @@
-package gr.hua.dit.metis.io;
+package gr.hua.dit.mgp.io;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.hadoop.io.Writable;
 
-/**
- *
- * @author peustr
- */
-public class LongToLongMapWritable implements Writable {
+public class LongToDoubleMapWritable implements Writable {
 
-    private Map<Long, Long> data;
+    private Map<Long, Double> data;
 
-    public LongToLongMapWritable() {
+    public LongToDoubleMapWritable() {
         data = new HashMap<>();
     }
 
-    public LongToLongMapWritable(long l1, long l2) {
+    public LongToDoubleMapWritable(long l, double d) {
         data = new HashMap<>();
-        data.put(l1, l2);
+        data.put(l, d);
     }
 
     @Override
@@ -29,24 +27,24 @@ public class LongToLongMapWritable implements Writable {
         data.clear();
         int size = in.readInt();
         for (int i = 0; i < size; i++) {
-            data.put(in.readLong(), in.readLong());
+            data.put(in.readLong(), in.readDouble());
         }
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeInt(data.size());
-        for (Map.Entry<Long, Long> each : data.entrySet()) {
+        for (Entry<Long, Double> each : data.entrySet()) {
             out.writeLong(each.getKey());
-            out.writeLong(each.getValue());
+            out.writeDouble(each.getValue());
         }
     }
 
-    public Map<Long, Long> getData() {
+    public Map<Long, Double> getData() {
         return data;
     }
 
-    public void setData(Map<Long, Long> data) {
+    public void setData(Map<Long, Double> data) {
         this.data = data;
     }
 

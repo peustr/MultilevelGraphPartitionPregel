@@ -1,5 +1,7 @@
-package gr.hua.dit.metis;
+package gr.hua.dit.mgp;
 
+import gr.hua.dit.mgp.io.TSVEdgeInputFormat;
+import gr.hua.dit.mgp.io.TSVVertexValueInputFormat;
 import java.io.File;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +21,7 @@ public class GraphPartitionTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphPartitionTests.class);
 
     @Test
-    public void metisOnTinyUnweightedGraph() throws Exception {
+    public void mgpTinyGraphTest() throws Exception {
 
         String[] tinyGraph = {
             "1 2 5", "1 3 5", "1 6 8",
@@ -45,11 +47,13 @@ public class GraphPartitionTests {
         };
 
         GiraphConfiguration conf = new GiraphConfiguration();
+
         conf.setComputationClass(GraphPartitionComputation.class);
         conf.setMasterComputeClass(GraphPartitionMasterCompute.class);
-        conf.setEdgeInputFormatClass(GraphPartitionEdgeInputFormat.class);
-        conf.setVertexInputFormatClass(GraphPartitionVertexValueInputFormat.class);
+        conf.setEdgeInputFormatClass(TSVEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(TSVVertexValueInputFormat.class);
         conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
+
         conf.set("partitions", "3");
 
         Iterable<String> results = InternalVertexRunner.run(conf, tinyGraph, tinyGraph);
@@ -58,25 +62,29 @@ public class GraphPartitionTests {
         }
 
     }
-    
-    @Test
-    public void metisFromFile() throws Exception {
 
-        List<String> l = FileUtils.readLines(new File("/tmp/3elt.graph.out"));
+    @Test
+    public void mgpFileInputGraphTest() throws Exception {
+
+        final String FILENAME = "";
+
+        List<String> l = FileUtils.readLines(new File(FILENAME));
         String[] tinyGraph = new String[l.size()];
         int i = 0;
-        for(String str: l) { 
+        for (String str : l) {
             tinyGraph[i++] = str;
         }
-        
+
         GiraphConfiguration conf = new GiraphConfiguration();
+
         conf.setComputationClass(GraphPartitionComputation.class);
         conf.setMasterComputeClass(GraphPartitionMasterCompute.class);
-        conf.setEdgeInputFormatClass(GraphPartitionEdgeInputFormat.class);
-        conf.setVertexInputFormatClass(GraphPartitionVertexValueInputFormat.class);
+        conf.setEdgeInputFormatClass(TSVEdgeInputFormat.class);
+        conf.setVertexInputFormatClass(TSVVertexValueInputFormat.class);
         conf.setVertexOutputFormatClass(IdWithValueTextOutputFormat.class);
-        conf.set("partitions", "3");
+
         conf.set("giraph.useSuperstepCounters", "false");
+        conf.set("partitions", "3");
 
         Iterable<String> results = InternalVertexRunner.run(conf, tinyGraph, tinyGraph);
         for (String result : results) {
