@@ -85,7 +85,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                 }
                 // If I found maximum weighted neighbor
                 if (pickedVertex != Long.MAX_VALUE) {
-                    //LOGGER.debug(vertex.getId() + " wants " + pickedVertex + " to match it");
+                    LOGGER.debug(vertex.getId() + " wants " + pickedVertex + " to match it");
                     sendMessage(new LongWritable(pickedVertex), new GraphPartitionMessageData(MATCH_MESSAGE, vertex.getId().get(), vertex.getValue().getWeight()));
                 } // Else, I am alone
                 else {
@@ -212,6 +212,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                             if (migrationCount > 0) {
                                 double migrationProbability = 1 / migrationCount;
                                 LOGGER.debug("Chance of migration during partitioning " + migrationProbability + "%");
+//                                if (Math.random() < migrationProbability) {
                                 if (randomNumberGenerator.nextDouble() < migrationProbability) {
                                     vertex.getValue().setPartition(vertex.getValue().getPartitionCandidate());
                                     LOGGER.debug(vertex.getId() + " migrated to partition " + vertex.getValue().getPartition());
@@ -263,6 +264,7 @@ public class GraphPartitionComputation extends BasicComputation<LongWritable, Gr
                 if (migrationCount > 0) {
                     double migrationProbability = 1 / migrationCount;
                     LOGGER.debug("Chance of migration during local refinement " + migrationProbability + "%");
+//                    if (Math.random() < migrationProbability) {
                     if (randomNumberGenerator.nextDouble() < migrationProbability) {
                         vertex.getValue().setPartition(sortedWeights.lastKey());
                         LOGGER.debug(vertex.getId() + " migrated to partition " + vertex.getValue().getPartition());
