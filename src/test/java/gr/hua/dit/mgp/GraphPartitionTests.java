@@ -1,4 +1,4 @@
-package gr.hua.dit.metis;
+package gr.hua.dit.mgp;
 
 import gr.hua.dit.mgp.io.TSVEdgeInputFormat;
 import gr.hua.dit.mgp.GraphPartitionMasterCompute;
